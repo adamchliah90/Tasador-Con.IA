@@ -73,9 +73,9 @@
     </div>
 
     <script>
-        // === VE A GOOGLE AI STUDIO, COPIA TU LLAVE ENTERA Y PÉGALA AQUÍ ===
-        const MI_API_KEY = "AIzaSyCmo6OVr731Z3UJ5gg8jb11aUQpRvGaYTc"; 
-        // =================================================================
+        // === TU LLAVE GRATUITA DE HUGGING FACE ===
+        const HF_TOKEN = "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"; 
+        // ==========================================
 
         async function enviarMensaje() {
             const input = document.getElementById('user-input');
@@ -84,46 +84,46 @@
             
             if (!texto) return;
 
-            // Mostrar mensaje del usuario
+            // 1. Mostrar tu mensaje en el chat
             chatBox.innerHTML += `<div class="msg user">${texto}</div>`;
             input.value = "";
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            // Mostrar que la IA está "pensando"
+            // 2. Mostrar estado "Escribiendo..."
             const tempId = "loading-" + Date.now();
-            chatBox.innerHTML += `<div id="${tempId}" class="msg bot" style="opacity: 0.5;">Escribiendo...</div>`;
+            chatBox.innerHTML += `<div id="${tempId}" class="msg bot" style="opacity: 0.5;">Analizando brawler...</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
-                // Usamos la ruta estándar de gemini-pro que es la más estable para proyectos nuevos
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${MI_API_KEY}`;
+                // Modelo Mistral gratuito e independiente de Google
+                const url = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2";
                 
                 const response = await fetch(url, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Authorization': `Bearer ${HF_TOKEN}`,
+                        'Content-Type': 'application/json' 
+                    },
                     body: JSON.stringify({
-                        contents: [{ 
-                            parts: [{ text: "Eres un experto profesional en el juego Brawl Stars. Responde de forma breve, épica y con consejos tácticos a esto: " + texto }] 
-                        }]
+                        inputs: `<s>[INST] Eres un experto profesional de Brawl Stars. Responde en ESPAÑOL con un consejo épico, corto y útil para: ${texto} [/INST]`,
+                        parameters: { 
+                            max_new_tokens: 150,
+                            return_full_text: false 
+                        }
                     })
                 });
 
                 const data = await response.json();
-                
-                // Quitar el mensaje de carga
                 document.getElementById(tempId).remove();
 
-                if (data.error) {
-                    chatBox.innerHTML += `<div class="msg bot" style="color:#ff4444">⚠️ Error de API: ${data.error.message}</div>`;
-                } else {
-                    const respuestaIA = data.candidates[0].content.parts[0].text;
-                    chatBox.innerHTML += `<div class="msg bot">🤖 ${respuestaIA}</div>`;
-                }
+                // 3. Mostrar respuesta de la IA limpia
+                let respuestaIA = data[0].generated_text || "¡Estoy listo para la batalla! Pregúntame sobre cualquier brawler.";
+                chatBox.innerHTML += `<div class="msg bot">🤖 ${respuestaIA.trim()}</div>`;
+                
             } catch (error) {
                 document.getElementById(tempId).remove();
-                chatBox.innerHTML += `<div class="msg bot" style="color:#ff4444">⚠️ Error de conexión. Revisa tu internet o tu API Key.</div>`;
+                chatBox.innerHTML += `<div class="msg bot" style="color:#ff4444">⚠️ Error: La IA está descansando. ¡Prueba de nuevo en unos segundos!</div>`;
             }
-            
             chatBox.scrollTop = chatBox.scrollHeight;
         }
     </script>
