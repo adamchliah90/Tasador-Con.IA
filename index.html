@@ -3,93 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brawl Hub Pro | AdamChliah</title>
+    <title>Brawl Hub AI | AdamChliah</title>
     <style>
         :root { --gold: #f3ca10; --cyan: #00e5ff; --dark: #0f0f12; }
-        body { background: var(--dark); color: white; font-family: 'Poppins', sans-serif; margin: 0; padding: 20px; text-align: center; }
+        body { background: var(--dark); color: white; font-family: sans-serif; margin: 0; padding: 20px; padding-bottom: 100px; }
         
-        h1 { color: var(--gold); font-size: 3rem; text-shadow: 0 0 15px rgba(243,202,16,0.5); margin-bottom: 10px; }
-        .subtitle { color: #888; margin-bottom: 40px; }
+        h1 { color: var(--gold); text-align: center; font-size: 2.5rem; }
+        .subtitle { text-align: center; color: #888; margin-bottom: 30px; }
 
-        /* BUSCADOR */
-        .search-box { max-width: 600px; margin: 0 auto 40px; }
-        input { width: 90%; padding: 15px 25px; border-radius: 50px; border: 2px solid #333; background: #1a1a1e; color: white; font-size: 1.1rem; outline: none; transition: 0.3s; }
-        input:focus { border-color: var(--cyan); box-shadow: 0 0 20px rgba(0,229,255,0.3); }
+        /* GRID DE BRAWLERS */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; }
+        .card { background: #1c1c21; border-radius: 20px; padding: 15px; border: 1px solid #333; text-align: center; }
+        .brawler-img { width: 100px; height: 100px; object-fit: contain; }
 
-        /* GRID */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; max-width: 1100px; margin: 0 auto; }
+        /* VENTANA DE CHAT FLOTANTE */
+        #chat-container { position: fixed; bottom: 20px; right: 20px; width: 320px; background: #1c1c21; border: 2px solid var(--cyan); border-radius: 15px; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 1000; }
+        #chat-box { height: 250px; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem; border-bottom: 1px solid #333; }
+        .msg { padding: 8px 12px; border-radius: 10px; max-width: 85%; }
+        .bot { background: #333; align-self: flex-start; }
+        .user { background: var(--cyan); color: black; align-self: flex-end; }
         
-        .card { background: #1c1c21; border-radius: 25px; padding: 20px; border: 1px solid #333; transition: 0.4s; position: relative; }
-        .card:hover { transform: scale(1.05); border-color: var(--cyan); box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-        
-        /* IMAGEN DEL BRAWLER */
-        .brawler-img { width: 120px; height: 120px; object-fit: contain; margin-bottom: 15px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5)); }
-        
-        .card h2 { margin: 10px 0; font-size: 1.8rem; }
-        .type { background: rgba(0,229,255,0.1); color: var(--cyan); padding: 5px 15px; border-radius: 50px; font-size: 0.8rem; font-weight: bold; }
-        
-        .btn { background: #ff4a4a; color: white; border: none; width: 100%; padding: 12px; margin-top: 20px; border-radius: 15px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn:hover { background: #ff2a2a; }
-
-        /* NOTIFICACIÓN IA */
-        #ia-box { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--cyan); color: #000; padding: 15px 30px; border-radius: 50px; font-weight: bold; display: none; z-index: 1000; box-shadow: 0 5px 20px rgba(0,229,255,0.4); }
+        .chat-input-area { display: flex; padding: 10px; gap: 5px; }
+        input { flex: 1; padding: 8px; border-radius: 5px; border: none; outline: none; }
+        button { background: var(--cyan); border: none; padding: 8px; border-radius: 5px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div id="ia-box">🤖 IA ANALIZANDO...</div>
-
-    <h1>BRAWL <span style="color:white">HUB</span></h1>
-    <p class="subtitle">La base de datos de @adamchliah90 para ganar siempre</p>
-
-    <div class="search-box">
-        <input type="text" id="buscador" placeholder="Busca tu rival..." onkeyup="filtrar()">
-    </div>
+    <h1>BRAWL <span style="color:white">HUB</span> AI</h1>
+    <p class="subtitle">Desarrollado por @adamchliah90</p>
 
     <div class="grid">
-        <div class="card" data-name="edgar">
-            <img src="https://vignette.wikia.nocookie.net/brawlstars/images/6/6e/Edgar_Portrait.png" class="brawler-img">
-            <div class="type">ASESINO</div>
-            <h2>Edgar</h2>
-            <button class="btn" onclick="ia('Usa a BULL o SHELLY. ¡No dejes que se acerque gratis!')">VER COUNTER</button>
+        <div class="card">
+            <img src="https://www.brawlstarsdps.com/images/brawlers/edgar.webp" class="brawler-img">
+            <h3>Edgar</h3>
         </div>
-
-        <div class="card" data-name="mortis">
-            <img src="https://vignette.wikia.nocookie.net/brawlstars/images/e/e3/Mortis_Portrait.png" class="brawler-img">
-            <div class="type">ASESINO</div>
-            <h2>Mortis</h2>
-            <button class="btn" onclick="ia('Usa a JACKY o un TANQUE. Cuando gaste sus dashes, ¡ataca!')">VER COUNTER</button>
+        <div class="card">
+            <img src="https://www.brawlstarsdps.com/images/brawlers/mortis.webp" class="brawler-img">
+            <h3>Mortis</h3>
         </div>
-
-        <div class="card" data-name="leon">
-            <img src="https://vignette.wikia.nocookie.net/brawlstars/images/1/1a/Leon_Portrait.png" class="brawler-img">
-            <div class="type">ASESINO</div>
-            <h2>Leon</h2>
-            <button class="btn" onclick="ia('Usa a TARA para verlo con su súper o a un brawler con mucho daño de cerca.')">VER COUNTER</button>
+        <div class="card">
+            <img src="https://www.brawlstarsdps.com/images/brawlers/leon.webp" class="brawler-img">
+            <h3>Leon</h3>
         </div>
+    </div>
 
-        <div class="card" data-name="shelly">
-            <img src="https://vignette.wikia.nocookie.net/brawlstars/images/a/af/Shelly_Portrait.png" class="brawler-img">
-            <div class="type">DESTRUCCIÓN</div>
-            <h2>Shelly</h2>
-            <button class="btn" onclick="ia('Usa a PIPER o francotiradores. Si te toca su súper, estás muerto.')">VER COUNTER</button>
+    <div id="chat-container">
+        <div style="background:var(--cyan); color:black; padding:10px; font-weight:bold; border-radius:12px 12px 0 0;">🤖 BRAWL IA ADVISOR</div>
+        <div id="chat-box">
+            <div class="msg bot">¡Hola Adam! Soy tu IA de Brawl Stars. ¿A quién quieres derrotar hoy?</div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="user-input" placeholder="Escribe aquí...">
+            <button onclick="enviarMensaje()">ENVIAR</button>
         </div>
     </div>
 
     <script>
-        function ia(mensaje) {
-            const box = document.getElementById('ia-box');
-            box.style.display = 'block';
-            box.innerHTML = "🤖 IA: " + mensaje;
-            setTimeout(() => { box.style.display = 'none'; }, 4000);
-        }
+        // PEGA TU API KEY ENTRE LAS COMILLAS
+        const MI_API_KEY = "AIzaSyDGvvv2hnD2-THssOT9JR3q3QiKH_p_azw"; 
 
-        function filtrar() {
-            let val = document.getElementById('buscador').value.toLowerCase();
-            let cards = document.querySelectorAll('.card');
-            cards.forEach(c => {
-                c.style.display = c.getAttribute('data-name').includes(val) ? 'block' : 'none';
-            });
+        async function enviarMensaje() {
+            const input = document.getElementById('user-input');
+            const chatBox = document.getElementById('chat-box');
+            const texto = input.value;
+            if (!texto) return;
+
+            // Mostrar mensaje del usuario
+            chatBox.innerHTML += `<div class="msg user">${texto}</div>`;
+            input.value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${MI_API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: "Eres un experto en Brawl Stars. Responde breve y épico a esto: " + texto }] }]
+                    })
+                });
+                const data = await response.json();
+                const respuestaIA = data.candidates[0].content.parts[0].text;
+
+                chatBox.innerHTML += `<div class="msg bot">🤖 ${respuestaIA}</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (error) {
+                chatBox.innerHTML += `<div class="msg bot" style="color:red">Error de conexión.</div>`;
+            }
         }
     </script>
 </body>
