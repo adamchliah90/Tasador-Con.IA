@@ -59,11 +59,11 @@
 
     <div id="chat-container">
         <div id="chat-header">
-            <span>🤖 BRAWL IA ADVISOR (GROQ)</span>
+            <span>🤖 BRAWL IA ADVISOR (FREE)</span>
             <span style="font-size: 0.7rem; opacity: 0.7;">ONLINE</span>
         </div>
         <div id="chat-box">
-            <div class="msg bot">¡Hola Adam! Sistema conectado a Groq AI de forma real. Pregúntame tácticas sobre cualquier brawler o mapa.</div>
+            <div class="msg bot">¡Hola Adam! Sistema conectado a la IA libre de claves. Pregúntame tácticas sobre cualquier brawler o mapa.</div>
         </div>
         <div class="chat-input-area">
             <input type="text" id="user-input" placeholder="Escribe tu duda..." onkeypress="if(event.key==='Enter') enviarMensaje()">
@@ -72,10 +72,6 @@
     </div>
 
     <script>
-        // === CLAVE ENCRIPTADA EN BASE64 ===
-        // Pega aquí dentro el texto raro que te dio la página web
-        const CLAVE_ENCRIPTADA = "Z3NrX29FRk5sSXp4UHNpQ3B6dzlGWnlOV0dkeWIzRllGaEthSjVsS1E2NGRhaEhZdHFFcWJHdVQ=";
-
         async function enviarMensaje() {
             const input = document.getElementById('user-input');
             const chatBox = document.getElementById('chat-box');
@@ -83,54 +79,32 @@
             
             if (!texto) return;
 
-            // Añadir mensaje del usuario
+            // Mensaje de usuario
             chatBox.innerHTML += `<div class="msg user">${texto}</div>`;
             input.value = "";
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            // Indicador de carga
+            // Carga
             const tempId = "loading-" + Date.now();
-            chatBox.innerHTML += `<div id="${tempId}" class="msg bot" style="opacity: 0.5;">Analizando datos en tiempo real...</div>`;
+            chatBox.innerHTML += `<div id="${tempId}" class="msg bot" style="opacity: 0.5;">Pensando...</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
-                // Desencriptamos la clave de forma segura en el navegador
-                const KEY = atob(CLAVE_ENCRIPTADA).trim();
+                // Endpoint público sin clave de API
+                const url = `https://text.pollinations.ai/prompt/${encodeURIComponent("Eres un experto en Brawl Stars. Da un consejo muy corto en español sobre: " + texto)}`;
 
-                // Llamada al endpoint de Groq
-                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: 'POST',
-                    headers: { 
-                        'Authorization': `Bearer ${KEY}`,
-                        'Content-Type': 'application/json' 
-                    },
-                    body: JSON.stringify({
-                        model: "llama3-8b-8192",
-                        messages: [
-                            { role: "system", content: "Eres un jugador profesional experto en Brawl Stars. Da un consejo táctico único, útil y corto en ESPAÑOL. Máximo 2 o 3 líneas." },
-                            { role: "user", content: `Dame una estrategia o consejo corto para: ${texto}` }
-                        ],
-                        max_tokens: 120
-                    })
-                });
+                const response = await fetch(url);
+                
+                if (!response.ok) throw new Error("Error en servidor");
 
-                if (!response.ok) {
-                    throw new Error("Fallo en la respuesta de Groq");
-                }
-
-                const data = await response.json();
-                const loadingElement = document.getElementById(tempId);
-                if (loadingElement) loadingElement.remove();
-
-                let respuestaIA = data.choices[0]?.message?.content?.trim();
-                if (!respuestaIA) throw new Error("Respuesta vacía");
-
-                chatBox.innerHTML += `<div class="msg bot">🤖 ${respuestaIA}</div>`;
+                const respuestaIA = await response.text();
+                
+                document.getElementById(tempId).remove();
+                chatBox.innerHTML += `<div class="msg bot">🤖 ${respuestaIA.trim()}</div>`;
 
             } catch (error) {
-                const loadingElement = document.getElementById(tempId);
-                if (loadingElement) loadingElement.remove();
-                chatBox.innerHTML += `<div class="msg bot" style="color:#ff4444">⚠️ Error de comunicación. Revisa tu clave en Base64.</div>`;
+                document.getElementById(tempId).remove();
+                chatBox.innerHTML += `<div class="msg bot" style="color:#ff4444">⚠️ Error de conexión. Inténtalo de nuevo.</div>`;
             }
             chatBox.scrollTop = chatBox.scrollHeight;
         }
