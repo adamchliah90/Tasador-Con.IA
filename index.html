@@ -1,325 +1,51 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tasador IA - ChatGPT Style</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { display: flex; height: 100vh; background-color: #212121; color: #ececf1; overflow: hidden; }
+<!DOCTYPE html><html lang="es"><head>    <meta charset="UTF-8">    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>Tasador IA - ChatGPT Style</title>    <style>        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }        body { display: flex; height: 100vh; background-color: #212121; color: #ececf1; overflow: hidden; }
+        /* BARRA LATERAL */        .sidebar { width: 260px; background-color: #171717; display: flex; flex-direction: column; padding: 10px; }        .new-chat-btn { border: 1px solid #4d4d4d; background: transparent; color: white; padding: 12px; border-radius: 5px; cursor: pointer; text-align: left; font-size: 14px; transition: 0.2s; width: 100%; }        .new-chat-btn:hover { background-color: #2a2b32; }        .chat-list { flex-grow: 1; margin-top: 12px; overflow-y: auto; }        .chat-item { padding: 10px; border-radius: 5px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; cursor: pointer; color: #d1d5db; }        .chat-item:hover { background-color: #2a2b32; }        .chat-item.active { background-color: #343541; }        .chat-item-title { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }        .chat-item-actions { display: none; gap: 4px; }        .chat-item:hover .chat-item-actions { display: flex; }        .action-btn { background: none; border: none; color: #8e8ea0; cursor: pointer; font-size: 13px; padding: 2px 4px; border-radius: 3px; }        .action-btn:hover { color: white; background-color: #444654; }        .sidebar-footer { padding-top: 10px; border-top: 1px solid #2a2b32; }        .premium-box { background: #2a2b32; padding: 12px; border-radius: 8px; text-align: center; border: 1px solid #10a37f; margin-top: 10px; }        .premium-box p { font-size: 11px; margin-bottom: 8px; color: #d1d5db; }        .premium-btn { background-color: #10a37f; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; font-size: 12px; }        .premium-btn:hover { background-color: #0d8a6b; }
+        /* CONTENIDO PRINCIPAL */        .main-content { flex-grow: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }        .header { padding: 16px 20px; color: #8e8ea0; font-weight: bold; font-size: 16px; border-bottom: 1px solid #2a2b32; flex-shrink: 0; }
+        /* ÁREA DE MENSAJES */        .messages-area { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 0; }        .messages-area::-webkit-scrollbar { width: 6px; }        .messages-area::-webkit-scrollbar-track { background: transparent; }        .messages-area::-webkit-scrollbar-thumb { background: #4d4d4d; border-radius: 3px; }
+        .welcome-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; text-align: center; color: #8e8ea0; }        .welcome-screen h1 { font-size: 28px; color: #ececf1; margin-bottom: 10px; }        .welcome-screen p { font-size: 15px; }
+        .message-row { display: flex; width: 100%; padding: 8px 0; }        .message-row.user { justify-content: flex-end; }        .message-row.assistant { justify-content: flex-start; }        .message-bubble { max-width: 70%; padding: 12px 16px; border-radius: 12px; font-size: 15px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }        .message-row.user .message-bubble { background-color: #2f2f2f; color: #ececf1; border-radius: 18px 18px 4px 18px; }        .message-row.assistant .message-bubble { background-color: #1a1a1a; color: #ececf1; border-radius: 18px 18px 18px 4px; border: 1px solid #2a2b32; }
+        .typing-indicator { display: none; align-items: center; gap: 6px; padding: 12px 16px; background-color: #1a1a1a; border: 1px solid #2a2b32; border-radius: 18px 18px 18px 4px; width: fit-content; }        .typing-indicator.visible { display: flex; }        .dot { width: 8px; height: 8px; background-color: #8e8ea0; border-radius: 50%; animation: bounce 1.3s infinite; }        .dot:nth-child(2) { animation-delay: 0.15s; }        .dot:nth-child(3) { animation-delay: 0.3s; }        @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-6px); } }
+        /* INPUT */        .input-area { padding: 16px 20px 20px; flex-shrink: 0; }        .input-container { position: relative; max-width: 760px; margin: 0 auto; }        .chat-input { width: 100%; background-color: #2f2f2f; border: 1px solid #4d4d4d; border-radius: 14px; padding: 14px 50px 14px 16px; color: white; font-size: 15px; outline: none; resize: none; min-height: 52px; max-height: 200px; line-height: 1.5; transition: border-color 0.2s; font-family: inherit; }        .chat-input:focus { border-color: #10a37f; }        .chat-input::placeholder { color: #8e8ea0; }        .send-btn { position: absolute; right: 12px; bottom: 12px; background: #10a37f; border: none; color: white; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.2s; }        .send-btn:hover { background: #0d8a6b; }        .send-btn:disabled { background: #4d4d4d; cursor: not-allowed; }        .footer-text { text-align: center; font-size: 11px; color: #8e8ea0; margin-top: 8px; }
+        /* EMPTY STATE */        .empty-sidebar { color: #5a5a6e; font-size: 12px; text-align: center; padding: 20px 10px; }
+        /* MODAL RENAME */        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; }        .modal-overlay.visible { display: flex; }        .modal { background: #2a2b32; border-radius: 10px; padding: 24px; width: 340px; border: 1px solid #4d4d4d; }        .modal h3 { margin-bottom: 14px; font-size: 16px; }        .modal input { width: 100%; background: #1a1a1a; border: 1px solid #4d4d4d; border-radius: 6px; padding: 10px; color: white; font-size: 14px; outline: none; }        .modal input:focus { border-color: #10a37f; }        .modal-actions { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }        .btn-cancel { background: transparent; border: 1px solid #4d4d4d; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; }        .btn-confirm { background: #10a37f; border: none; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }    </style></head><body>
+    <div class="sidebar">        <button class="new-chat-btn" id="newChatBtn">+ Nuevo chat</button>        <div class="chat-list" id="chatList">            <div class="empty-sidebar">No hay chats aún.<br>¡Crea uno nuevo!</div>        </div>        <div class="sidebar-footer">            <div class="premium-box">                <p>⭐ <b>Plan Pro (Mensual)</b><br>Chats ilimitados y mejores respuestas.</p>                <button class="premium-btn" onclick="alert('Aquí irá la pasarela de Stripe de pago mensual')">Mejorar a Pro</button>            </div>        </div>    </div>
+    <div class="main-content">        <div class="header">Tasador IA v1.0</div>        <div class="messages-area" id="messagesArea">            <div class="welcome-screen" id="welcomeScreen">                <h1>¿Cómo quieres tasar tu cuenta hoy?</h1>                <p>Escribe en el chat para empezar. La IA te ayudará a valorar tu cuenta de videojuegos.</p>            </div>        </div>        <div class="input-area">            <div class="input-container">                <textarea class="chat-input" id="chatInput" placeholder="Pregunta lo que quieras..." rows="1"></textarea>                <button class="send-btn" id="sendBtn" title="Enviar">➔</button>            </div>            <p class="footer-text">El sistema puede dar valores estimados. Cuentas Premium requieren Plan Pro.</p>        </div>    </div>
+    <div class="modal-overlay" id="renameModal">        <div class="modal">            <h3>Renombrar chat</h3>            <input type="text" id="renameInput" placeholder="Nombre del chat">            <div class="modal-actions">                <button class="btn-cancel" id="cancelRename">Cancelar</button>                <button class="btn-confirm" id="confirmRename">Guardar</button>            </div>        </div>    </div>
+    <script>        let currentChatId = null;        let isLoading = false;        let renamingChatId = null;
+        const chatList = document.getElementById('chatList');        const messagesArea = document.getElementById('messagesArea');        const chatInput = document.getElementById('chatInput');        const sendBtn = document.getElementById('sendBtn');        const welcomeScreen = document.getElementById('welcomeScreen');        const renameModal = document.getElementById('renameModal');        const renameInput = document.getElementById('renameInput');
+        async function loadChats() {            const res = await fetch('/api/chats/');            if (!res.ok) return;            const chats = await res.json();            renderSidebar(chats);        }
+        function renderSidebar(chats) {            if (!chats.length) {                chatList.innerHTML = '<div class="empty-sidebar">No hay chats aún.<br>¡Crea uno nuevo!</div>';                return;            }            chatList.innerHTML = chats.map(c => `                <div class="chat-item${c.id === currentChatId ? ' active' : ''}" data-id="${c.id}" onclick="loadChat(${c.id})">                    <span class="chat-item-title">${escapeHtml(c.title)}</span>                    <div class="chat-item-actions">                        <button class="action-btn" title="Renombrar" onclick="openRename(event, ${c.id}, '${escapeHtml(c.title).replace(/'/g, "\\'")}')">✏️</button>                        <button class="action-btn" title="Eliminar" onclick="deleteChat(event, ${c.id})">🗑️</button>                    </div>                </div>            `).join('');        }
+        async function createNewChat() {            const res = await fetch('/api/chats/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });            if (!res.ok) return;            const chat = await res.json();            currentChatId = chat.id;            clearMessages();            await loadChats();        }
+        async function loadChat(id) {            currentChatId = id;            clearMessages();            document.querySelectorAll('.chat-item').forEach(el => el.classList.toggle('active', parseInt(el.dataset.id) === id));            const res = await fetch(`/api/chats/${id}/messages`);            if (!res.ok) return;            const msgs = await res.json();            if (msgs.length === 0) {                welcomeScreen.style.display = 'flex';            } else {                welcomeScreen.style.display = 'none';                msgs.forEach(m => appendMessage(m.role, m.content));            }            scrollToBottom();        }
+        function clearMessages() {            messagesArea.innerHTML = '';            welcomeScreen.style.display = 'flex';            messagesArea.appendChild(welcomeScreen);        }
+        async function sendMessage() {            if (isLoading) return;            const content = chatInput.value.trim();            if (!content) return;
+            if (!currentChatId) {                const res = await fetch('/api/chats/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });                if (!res.ok) return;                const chat = await res.json();                currentChatId = chat.id;                await loadChats();            }
+            welcomeScreen.style.display = 'none';            chatInput.value = '';            autoResize();            isLoading = true;            sendBtn.disabled = true;
+            appendMessage('user', content);            const typingRow = appendTyping();            scrollToBottom();
+            try {                const res = await fetch('/api/chat', {                    method: 'POST',                    headers: { 'Content-Type': 'application/json' },                    body: JSON.stringify({ chatId: currentChatId, content }),                });                const data = await res.json();                typingRow.remove();                if (res.ok) {                    appendMessage('assistant', data.content);                    await loadChats();                } else {                    appendMessage('assistant', '⚠️ Error al obtener respuesta. Inténtalo de nuevo.');                }            } catch {                typingRow.remove();                appendMessage('assistant', '⚠️ Error de conexión. Comprueba tu conexión e inténtalo de nuevo.');            }
+            isLoading = false;            sendBtn.disabled = false;            scrollToBottom();        }
+        function appendMessage(role, content) {            const row = document.createElement('div');            row.className = `message-row ${role}`;            const bubble = document.createElement('div');            bubble.className = 'message-bubble';            bubble.textContent = content;            row.appendChild(bubble);            messagesArea.appendChild(row);            return row;        }
+        function appendTyping() {            const row = document.createElement('div');            row.className = 'message-row assistant';            row.innerHTML = '<div class="typing-indicator visible"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';            messagesArea.appendChild(row);            return row;        }
+        function scrollToBottom() {            messagesArea.scrollTop = messagesArea.scrollHeight;        }
+        function autoResize() {            chatInput.style.height = 'auto';            chatInput.style.height = Math.min(chatInput.scrollHeight, 200) + 'px';        }
+        function openRename(event, id, currentTitle) {            event.stopPropagation();            renamingChatId = id;            renameInput.value = currentTitle;            renameModal.classList.add('visible');            renameInput.focus();            renameInput.select();        }
+        async function confirmRename() {            const title = renameInput.value.trim();            if (!title || !renamingChatId) return;            await fetch(`/api/chats/${renamingChatId}`, {                method: 'PATCH',                headers: { 'Content-Type': 'application/json' },                body: JSON.stringify({ title }),            });            renameModal.classList.remove('visible');            renamingChatId = null;            await loadChats();        }
+        async function deleteChat(event, id) {            event.stopPropagation();            if (!confirm('¿Eliminar este chat?')) return;            await fetch(`/api/chats/${id}`, { method: 'DELETE' });            if (currentChatId === id) {                currentChatId = null;                clearMessages();            }            await loadChats();        }
+        function escapeHtml(str) {            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');        }
+        // Event listeners        document.getElementById('newChatBtn').addEventListener('click', createNewChat);        sendBtn.addEventListener('click', sendMessage);        chatInput.addEventListener('keydown', e => {            if (e.key === 'Enter' && !e.shiftKey) {                e.preventDefault();                sendMessage();            }        });        chatInput.addEventListener('input', autoResize);        document.getElementById('confirmRename').addEventListener('click', confirmRename);        document.getElementById('cancelRename').addEventListener('click', () => renameModal.classList.remove('visible'));        renameInput.addEventListener('keydown', e => { if (e.key === 'Enter') confirmRename(); });        renameModal.addEventListener('click', e => { if (e.target === renameModal) renameModal.classList.remove('visible'); });
+        // Init        loadChats();    </script>
 
-        /* BARRA LATERAL */
-        .sidebar { width: 260px; background-color: #171717; display: flex; flex-direction: column; padding: 10px; }
-        .new-chat-btn { border: 1px solid #4d4d4d; background: transparent; color: white; padding: 12px; border-radius: 5px; cursor: pointer; text-align: left; font-size: 14px; transition: 0.2s; width: 100%; }
-        .new-chat-btn:hover { background-color: #2a2b32; }
-        .chat-list { flex-grow: 1; margin-top: 12px; overflow-y: auto; }
-        .chat-item { padding: 10px; border-radius: 5px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; cursor: pointer; color: #d1d5db; }
-        .chat-item:hover { background-color: #2a2b32; }
-        .chat-item.active { background-color: #343541; }
-        .chat-item-title { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .chat-item-actions { display: none; gap: 4px; }
-        .chat-item:hover .chat-item-actions { display: flex; }
-        .action-btn { background: none; border: none; color: #8e8ea0; cursor: pointer; font-size: 13px; padding: 2px 4px; border-radius: 3px; }
-        .action-btn:hover { color: white; background-color: #444654; }
-        .sidebar-footer { padding-top: 10px; border-top: 1px solid #2a2b32; }
-        .premium-box { background: #2a2b32; padding: 12px; border-radius: 8px; text-align: center; border: 1px solid #10a37f; margin-top: 10px; }
-        .premium-box p { font-size: 11px; margin-bottom: 8px; color: #d1d5db; }
-        .premium-btn { background-color: #10a37f; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; font-size: 12px; }
-        .premium-btn:hover { background-color: #0d8a6b; }
-
-        /* CONTENIDO PRINCIPAL */
-        .main-content { flex-grow: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        .header { padding: 16px 20px; color: #8e8ea0; font-weight: bold; font-size: 16px; border-bottom: 1px solid #2a2b32; flex-shrink: 0; }
-
-        /* ÁREA DE MENSAJES */
-        .messages-area { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 0; }
-        .messages-area::-webkit-scrollbar { width: 6px; }
-        .messages-area::-webkit-scrollbar-track { background: transparent; }
-        .messages-area::-webkit-scrollbar-thumb { background: #4d4d4d; border-radius: 3px; }
-
-        .welcome-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; text-align: center; color: #8e8ea0; }
-        .welcome-screen h1 { font-size: 28px; color: #ececf1; margin-bottom: 10px; }
-        .welcome-screen p { font-size: 15px; }
-
-        .message-row { display: flex; width: 100%; padding: 8px 0; }
-        .message-row.user { justify-content: flex-end; }
-        .message-row.assistant { justify-content: flex-start; }
-        .message-bubble { max-width: 70%; padding: 12px 16px; border-radius: 12px; font-size: 15px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
-        .message-row.user .message-bubble { background-color: #2f2f2f; color: #ececf1; border-radius: 18px 18px 4px 18px; }
-        .message-row.assistant .message-bubble { background-color: #1a1a1a; color: #ececf1; border-radius: 18px 18px 18px 4px; border: 1px solid #2a2b32; }
-
-        .typing-indicator { display: none; align-items: center; gap: 6px; padding: 12px 16px; background-color: #1a1a1a; border: 1px solid #2a2b32; border-radius: 18px 18px 18px 4px; width: fit-content; }
-        .typing-indicator.visible { display: flex; }
-        .dot { width: 8px; height: 8px; background-color: #8e8ea0; border-radius: 50%; animation: bounce 1.3s infinite; }
-        .dot:nth-child(2) { animation-delay: 0.15s; }
-        .dot:nth-child(3) { animation-delay: 0.3s; }
-        @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-6px); } }
-
-        /* INPUT */
-        .input-area { padding: 16px 20px 20px; flex-shrink: 0; }
-        .input-container { position: relative; max-width: 760px; margin: 0 auto; }
-        .chat-input { width: 100%; background-color: #2f2f2f; border: 1px solid #4d4d4d; border-radius: 14px; padding: 14px 50px 14px 16px; color: white; font-size: 15px; outline: none; resize: none; min-height: 52px; max-height: 200px; line-height: 1.5; transition: border-color 0.2s; font-family: inherit; }
-        .chat-input:focus { border-color: #10a37f; }
-        .chat-input::placeholder { color: #8e8ea0; }
-        .send-btn { position: absolute; right: 12px; bottom: 12px; background: #10a37f; border: none; color: white; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.2s; }
-        .send-btn:hover { background: #0d8a6b; }
-        .send-btn:disabled { background: #4d4d4d; cursor: not-allowed; }
-        .footer-text { text-align: center; font-size: 11px; color: #8e8ea0; margin-top: 8px; }
-
-        /* EMPTY STATE */
-        .empty-sidebar { color: #5a5a6e; font-size: 12px; text-align: center; padding: 20px 10px; }
-
-        /* MODAL RENAME */
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; }
-        .modal-overlay.visible { display: flex; }
-        .modal { background: #2a2b32; border-radius: 10px; padding: 24px; width: 340px; border: 1px solid #4d4d4d; }
-        .modal h3 { margin-bottom: 14px; font-size: 16px; }
-        .modal input { width: 100%; background: #1a1a1a; border: 1px solid #4d4d4d; border-radius: 6px; padding: 10px; color: white; font-size: 14px; outline: none; }
-        .modal input:focus { border-color: #10a37f; }
-        .modal-actions { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
-        .btn-cancel { background: transparent; border: 1px solid #4d4d4d; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; }
-        .btn-confirm { background: #10a37f; border: none; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
-    </style>
-</head>
-<body>
-
-    <div class="sidebar">
-        <button class="new-chat-btn" id="newChatBtn">+ Nuevo chat</button>
-        <div class="chat-list" id="chatList">
-            <div class="empty-sidebar">No hay chats aún.<br>¡Crea uno nuevo!</div>
-        </div>
-        <div class="sidebar-footer">
-            <div class="premium-box">
-                <p>⭐ <b>Plan Pro (Mensual)</b><br>Chats ilimitados y mejores respuestas.</p>
-                <button class="premium-btn" onclick="alert('Aquí irá la pasarela de Stripe de pago mensual')">Mejorar a Pro</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="main-content">
-        <div class="header">Tasador IA v1.0</div>
-        <div class="messages-area" id="messagesArea">
-            <div class="welcome-screen" id="welcomeScreen">
-                <h1>¿Cómo quieres tasar tu cuenta hoy?</h1>
-                <p>Escribe en el chat para empezar. La IA te ayudará a valorar tu cuenta de videojuegos.</p>
-            </div>
-        </div>
-        <div class="input-area">
-            <div class="input-container">
-                <textarea class="chat-input" id="chatInput" placeholder="Pregunta lo que quieras..." rows="1"></textarea>
-                <button class="send-btn" id="sendBtn" title="Enviar">➔</button>
-            </div>
-            <p class="footer-text">El sistema puede dar valores estimados. Cuentas Premium requieren Plan Pro.</p>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="renameModal">
-        <div class="modal">
-            <h3>Renombrar chat</h3>
-            <input type="text" id="renameInput" placeholder="Nombre del chat">
-            <div class="modal-actions">
-                <button class="btn-cancel" id="cancelRename">Cancelar</button>
-                <button class="btn-confirm" id="confirmRename">Guardar</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let currentChatId = null;
-        let isLoading = false;
-        let renamingChatId = null;
-
-        const chatList = document.getElementById('chatList');
-        const messagesArea = document.getElementById('messagesArea');
-        const chatInput = document.getElementById('chatInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const welcomeScreen = document.getElementById('welcomeScreen');
-        const renameModal = document.getElementById('renameModal');
-        const renameInput = document.getElementById('renameInput');
-
-        async function loadChats() {
-            const res = await fetch('/api/chats/');
-            if (!res.ok) return;
-            const chats = await res.json();
-            renderSidebar(chats);
-        }
-
-        function renderSidebar(chats) {
-            if (!chats.length) {
-                chatList.innerHTML = '<div class="empty-sidebar">No hay chats aún.<br>¡Crea uno nuevo!</div>';
-                return;
-            }
-            chatList.innerHTML = chats.map(c => `
-                <div class="chat-item${c.id === currentChatId ? ' active' : ''}" data-id="${c.id}" onclick="loadChat(${c.id})">
-                    <span class="chat-item-title">${escapeHtml(c.title)}</span>
-                    <div class="chat-item-actions">
-                        <button class="action-btn" title="Renombrar" onclick="openRename(event, ${c.id}, '${escapeHtml(c.title).replace(/'/g, "\\'")}')">✏️</button>
-                        <button class="action-btn" title="Eliminar" onclick="deleteChat(event, ${c.id})">🗑️</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        async function createNewChat() {
-            const res = await fetch('/api/chats/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
-            if (!res.ok) return;
-            const chat = await res.json();
-            currentChatId = chat.id;
-            clearMessages();
-            await loadChats();
-        }
-
-        async function loadChat(id) {
-            currentChatId = id;
-            clearMessages();
-            document.querySelectorAll('.chat-item').forEach(el => el.classList.toggle('active', parseInt(el.dataset.id) === id));
-            const res = await fetch(`/api/chats/${id}/messages`);
-            if (!res.ok) return;
-            const msgs = await res.json();
-            if (msgs.length === 0) {
-                welcomeScreen.style.display = 'flex';
-            } else {
-                welcomeScreen.style.display = 'none';
-                msgs.forEach(m => appendMessage(m.role, m.content));
-            }
-            scrollToBottom();
-        }
-
-        function clearMessages() {
-            messagesArea.innerHTML = '';
-            welcomeScreen.style.display = 'flex';
-            messagesArea.appendChild(welcomeScreen);
-        }
-
-        async function sendMessage() {
-            if (isLoading) return;
-            const content = chatInput.value.trim();
-            if (!content) return;
-
-            if (!currentChatId) {
-                const res = await fetch('/api/chats/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
-                if (!res.ok) return;
-                const chat = await res.json();
-                currentChatId = chat.id;
-                await loadChats();
-            }
-
-            welcomeScreen.style.display = 'none';
-            chatInput.value = '';
-            autoResize();
-            isLoading = true;
-            sendBtn.disabled = true;
-
-            appendMessage('user', content);
-            const typingRow = appendTyping();
-            scrollToBottom();
-
-            try {
-                const res = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chatId: currentChatId, content }),
-                });
-                const data = await res.json();
-                typingRow.remove();
-                if (res.ok) {
-                    appendMessage('assistant', data.content);
-                    await loadChats();
-                } else {
-                    appendMessage('assistant', '⚠️ Error al obtener respuesta. Inténtalo de nuevo.');
-                }
-            } catch {
-                typingRow.remove();
-                appendMessage('assistant', '⚠️ Error de conexión. Comprueba tu conexión e inténtalo de nuevo.');
-            }
-
-            isLoading = false;
-            sendBtn.disabled = false;
-            scrollToBottom();
-        }
-
-        function appendMessage(role, content) {
-            const row = document.createElement('div');
-            row.className = `message-row ${role}`;
-            const bubble = document.createElement('div');
-            bubble.className = 'message-bubble';
-            bubble.textContent = content;
-            row.appendChild(bubble);
-            messagesArea.appendChild(row);
-            return row;
-        }
-
-        function appendTyping() {
-            const row = document.createElement('div');
-            row.className = 'message-row assistant';
-            row.innerHTML = '<div class="typing-indicator visible"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
-            messagesArea.appendChild(row);
-            return row;
-        }
-
-        function scrollToBottom() {
-            messagesArea.scrollTop = messagesArea.scrollHeight;
-        }
-
-        function autoResize() {
-            chatInput.style.height = 'auto';
-            chatInput.style.height = Math.min(chatInput.scrollHeight, 200) + 'px';
-        }
-
-        function openRename(event, id, currentTitle) {
-            event.stopPropagation();
-            renamingChatId = id;
-            renameInput.value = currentTitle;
-            renameModal.classList.add('visible');
-            renameInput.focus();
-            renameInput.select();
-        }
-
-        async function confirmRename() {
-            const title = renameInput.value.trim();
-            if (!title || !renamingChatId) return;
-            await fetch(`/api/chats/${renamingChatId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title }),
+    <script type="text/javascript">
+      (function(d, t) {
+          var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
+          v.onload = function() {
+            window.voiceflow.chat.load({
+              verify: { projectID: '66472d47e7b39a002492102f' },
+              url: 'https://general-runtime.voiceflow.com',
+              versionID: 'production'
             });
-            renameModal.classList.remove('visible');
-            renamingChatId = null;
-            await loadChats();
-        }
-
-        async function deleteChat(event, id) {
-            event.stopPropagation();
-            if (!confirm('¿Eliminar este chat?')) return;
-            await fetch(`/api/chats/${id}`, { method: 'DELETE' });
-            if (currentChatId === id) {
-                currentChatId = null;
-                clearMessages();
-            }
-            await loadChats();
-        }
-
-        function escapeHtml(str) {
-            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-        }
-
-        // Event listeners
-        document.getElementById('newChatBtn').addEventListener('click', createNewChat);
-        sendBtn.addEventListener('click', sendMessage);
-        chatInput.addEventListener('keydown', e => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
-        chatInput.addEventListener('input', autoResize);
-        document.getElementById('confirmRename').addEventListener('click', confirmRename);
-        document.getElementById('cancelRename').addEventListener('click', () => renameModal.classList.remove('visible'));
-        renameInput.addEventListener('keydown', e => { if (e.key === 'Enter') confirmRename(); });
-        renameModal.addEventListener('click', e => { if (e.target === renameModal) renameModal.classList.remove('visible'); });
-
-        // Init
-        loadChats();
+          }
+          v.src = "https://cdn.voiceflow.com/widget/bundle.mjs"; v.type = "text/javascript"; s.parentNode.insertBefore(v, s);
+      })(document, 'script');
     </script>
-</body>
-</html>
+</body></html>
